@@ -4,6 +4,7 @@ use std::io::BufRead;
 
 mod file_normalizer;
 mod version_checker;
+mod config;
 
 fn print_usage(program: &str, opts: &Options) {
     let brief = format!("Usage: {} FILE [options]", program);
@@ -17,6 +18,7 @@ fn main() {
     let mut opts = Options::new();
     opts.optflag("h", "help", "print this help menu");
     opts.optflag("p", "print-version", "print version and exit.");
+    opts.optflag("", "dry-run", "print found blender executable and exit.");
 
     let matches = match opts.parse(&args[1..]) {
         Ok(m) => { m }
@@ -55,7 +57,16 @@ fn main() {
 
     dbg!(&version);
     if matches.opt_present("print-version") {
-        println!("{}", version.version);
+        println!("{}", &version.version);
+        process::exit(0);
+    }
+
+    let settings = config::load().unwrap();
+
+    if matches.opt_present("dry-run") {
+        let executable = settings.get_executable(&version.version);
+        println!("Versoin: {}", &version.version);
+        println!("Blender executable: {}", &executable.unwrap_or("missing".to_string()));
         process::exit(0);
     }
 
