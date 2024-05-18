@@ -1,0 +1,9 @@
+[package]
+name = "blender_file_version_switcher"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+flate2 = "1.0"
+getopts = "0.2"
+zstd = "0.13"
