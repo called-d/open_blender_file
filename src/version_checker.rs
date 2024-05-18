@@ -32,11 +32,7 @@ pub fn get_version(version_header: &str) -> Result<BlenderVersion, InvalidVersio
         bit: if content.starts_with("BLENDER-") { 64 } else { 32 },
         version: match &raw_version_string[0..1] {
             "1" | "2" => format!("{}.{}", &raw_version_string[0..1], &raw_version_string[1..]),
-            _ => if raw_version_string.ends_with("0") {
-                format!("{}.{}", &raw_version_string[0..1], &raw_version_string[1..2])
-            } else {
-                format!("{}.{}.{}", &raw_version_string[0..1], &raw_version_string[1..2], &raw_version_string[2..])
-            },
+            _ => format!("{}.{}", &raw_version_string[0..1], &raw_version_string[1..].parse::<u8>().unwrap())
         }
     });
 }
