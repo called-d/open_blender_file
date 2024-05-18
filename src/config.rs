@@ -3,6 +3,8 @@ use std::{collections::HashMap, fs};
 use config::Config;
 use serde::{Deserialize, Serialize};
 
+use crate::version_checker::BlenderVersion;
+
 const SELF_NAME: &str = "blender_file_version_switcher";
 const CONFIG_FILE_NAME: &str = "config.json";
 
@@ -12,15 +14,21 @@ pub struct Settings {
     pub default: Option<String>,
 }
 fn can_open(exec_version: &str, file_version: &str) -> bool {
-    let exec_version = exec_version.replace(".", "");
-    let file_version = file_version.replace(".", "");
+    let exec_version = BlenderVersion::to_raw_version(exec_version);
+    let file_version = BlenderVersion::to_raw_version(file_version);
     exec_version >= file_version
 }
 #[test]
 fn test_can_open() {
     assert!(can_open("3.0.1", "3.0"));
     assert!(can_open("3.0", "3.0"));
-    assert!(!can_open("3.0", "3.0.1"));
+    assert!(can_open("3.0", "3.0.1"));
+    assert!(!can_open("2.93", "3.0"));
+    assert!(!can_open("1.80", "2.93"));
+    assert!(can_open("2.93", "1.80"));
+    assert!(can_open("4.0", "3.0.1"));
+    assert!(!can_open("3.0", "4.1.1"));
+    assert!(!can_open("4.0", "4.1.1"));
 }
 impl Settings {
     pub fn get_executable(&self, file_version: &str) -> Option<String> {
