@@ -15,7 +15,12 @@ mod registry;
 mod version_checker;
 
 fn print_usage(program: &str, opts: &Options) {
-    let brief = format!("Usage: {} FILE [options]", program);
+    let program = std::path::Path::new(program);
+    let program = program.file_name().unwrap().to_str().unwrap();
+    let brief = format!(
+        "Usage: {} <FILE> [options] [\"--\" [extra args for blender.exe]]",
+        program
+    );
     println!("{}", opts.usage(&brief));
 }
 

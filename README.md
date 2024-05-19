@@ -37,7 +37,7 @@ adapted from [ファイルを作成したバージョンを判別してBlender�
 
 ## コマンドライン引数
 ```
-Usage: open_blender_file.exe <FILE> [options]
+Usage: open_blender_file <FILE> [options] ["--" [extra args for blender.exe]]
 
 Options:
         --set-icon      set icon (registry editing).
