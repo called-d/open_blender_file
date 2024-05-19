@@ -1,18 +1,18 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
 
-use std::{env, process};
 use getopts::Options;
 use std::io::BufRead;
+use std::{env, process};
 
 use crate::gui::open_ui;
 
-mod file_normalizer;
-mod version_checker;
 mod config;
 mod exec;
+mod file_normalizer;
 mod gui;
 #[cfg(target_os = "windows")]
 mod registry;
+mod version_checker;
 
 fn print_usage(program: &str, opts: &Options) {
     let brief = format!("Usage: {} FILE [options]", program);
@@ -28,10 +28,8 @@ fn print_usage(program: &str, opts: &Options) {
 fn extra_args(free: &Vec<String>) -> (Vec<String>, Option<Vec<String>>) {
     let mut iter = free.splitn(2, |arg| arg == "--");
     (
-        iter.next()
-            .map_or(vec![], |free| free.to_vec()),
-        iter.next()
-            .map_or(None, |extra| Some(extra.to_vec()))
+        iter.next().map_or(vec![], |free| free.to_vec()),
+        iter.next().map_or(None, |extra| Some(extra.to_vec())),
     )
 }
 #[test]
@@ -40,14 +38,27 @@ fn split_args() {
     assert_eq!(extra_args(&Vec::<String>::new()), (args![], None));
     assert_eq!(extra_args(&args!["1"]), (args!["1"], None));
     assert_eq!(extra_args(&args!["--"]), (args![], Some(args![])));
-    assert_eq!(extra_args(&args!["a", "--", "b", "c"]), (args!["a"], Some(args!["b", "c"])));
+    assert_eq!(
+        extra_args(&args!["a", "--", "b", "c"]),
+        (args!["a"], Some(args!["b", "c"]))
+    );
 }
 fn find_executable(version: &str) -> Option<String> {
     let path = match &version[0..1] {
-        "2" => format!("C:\\Program Files\\Blender Foundation\\Blender {}\\blender.exe", version),
-        _ => format!("C:\\Program Files\\Blender Foundation\\Blender {}\\blender-launcher.exe", version),
+        "2" => format!(
+            "C:\\Program Files\\Blender Foundation\\Blender {}\\blender.exe",
+            version
+        ),
+        _ => format!(
+            "C:\\Program Files\\Blender Foundation\\Blender {}\\blender-launcher.exe",
+            version
+        ),
     };
-    if std::path::Path::new(&path).exists() { Some(path) } else { None }
+    if std::path::Path::new(&path).exists() {
+        Some(path)
+    } else {
+        None
+    }
 }
 
 fn main() {
@@ -56,15 +67,21 @@ fn main() {
 
     let mut opts = Options::new();
     if cfg!(target_os = "windows") {
-        opts.optflag("", "set-icon", "set icon (requires Administrator to edit registry).");
+        opts.optflag(
+            "",
+            "set-icon",
+            "set icon (requires Administrator to edit registry).",
+        );
     }
     opts.optflag("h", "help", "print this help menu");
     opts.optflag("p", "print-version", "print version and exit.");
     opts.optflag("", "dry-run", "print found blender executable and exit.");
 
     let matches = match opts.parse(&args[1..]) {
-        Ok(m) => { m }
-        Err(f) => { panic!("{}", f.to_string()) }
+        Ok(m) => m,
+        Err(f) => {
+            panic!("{}", f.to_string())
+        }
     };
 
     if matches.opt_present("h") {
@@ -99,9 +116,7 @@ fn main() {
 
         let mut buffer = vec![0u8; 32];
         reader.read_until(0, &mut buffer).unwrap();
-        let version_str= std::str::from_utf8(&buffer)
-            .unwrap()
-            .trim_matches('\0');
+        let version_str = std::str::from_utf8(&buffer).unwrap().trim_matches('\0');
         version_checker::get_version(version_str).unwrap()
     };
 
@@ -116,12 +131,18 @@ fn main() {
     let executable = settings.get_executable(&version.version);
     if matches.opt_present("dry-run") {
         println!("Versoin: {}", &version.version);
-        println!("Blender executable: {}", &executable.unwrap_or("missing".to_string()));
+        println!(
+            "Blender executable: {}",
+            &executable.unwrap_or("missing".to_string())
+        );
         process::exit(0);
     }
     let executable = executable.or(find_executable(&version.version));
     if let Some(executable) = executable {
-        exec::open(&executable, &input, extra_args).unwrap().wait().unwrap();
+        exec::open(&executable, &input, extra_args)
+            .unwrap()
+            .wait()
+            .unwrap();
         process::exit(0);
     }
     open_ui(&version, &input).unwrap();

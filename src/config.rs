@@ -37,17 +37,19 @@ impl Settings {
         }
         if let Some(default) = &self.default {
             if can_open(&default, file_version) {
-                return self.get_executable(&default)
+                return self.get_executable(&default);
             }
-            eprintln!("file version {} > default version {}", &file_version, &default);
+            eprintln!(
+                "file version {} > default version {}",
+                &file_version, &default
+            );
         }
         None
     }
 }
 
 pub fn load() -> Result<Settings, config::ConfigError> {
-    let config_dir = dirs::config_dir().unwrap()
-        .join(SELF_NAME);
+    let config_dir = dirs::config_dir().unwrap().join(SELF_NAME);
     let config_file = config_dir.join(CONFIG_FILE_NAME);
     if config_file.exists() {
         let settings = Config::builder()

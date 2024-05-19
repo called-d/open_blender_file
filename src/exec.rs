@@ -1,11 +1,11 @@
-use std::process::{Child, Command};
 #[cfg(target_os = "windows")]
 use lnk::ShellLink;
+use std::process::{Child, Command};
 
 #[cfg(target_os = "windows")]
 fn normalize_link(executable: &str) -> (String, Option<Vec<String>>) {
     if !executable.ends_with(".lnk") {
-        return (executable.to_string(), None)
+        return (executable.to_string(), None);
     }
 
     let shortcut = ShellLink::open(executable).unwrap();
@@ -14,7 +14,7 @@ fn normalize_link(executable: &str) -> (String, Option<Vec<String>>) {
     let args = &shortcut.arguments().as_ref().map(|x| vec![x.into()]);
     println!("{:#?}", shortcut);
 
-    return (local_base_path.to_string(), args.clone())
+    return (local_base_path.to_string(), args.clone());
 }
 #[cfg(not(target_os = "windows"))]
 fn normalize_link(executable: &str) -> (String, Option<Vec<String>>) {

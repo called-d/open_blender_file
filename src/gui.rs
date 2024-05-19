@@ -8,7 +8,11 @@ struct MyApp {
 }
 
 impl MyApp {
-    fn new(_cc: &eframe::CreationContext<'_>, version: Box<BlenderVersion>, current_file: Box<str>) -> Self {
+    fn new(
+        _cc: &eframe::CreationContext<'_>,
+        version: Box<BlenderVersion>,
+        current_file: Box<str>,
+    ) -> Self {
         Self {
             version,
             current_file,
@@ -25,7 +29,10 @@ impl eframe::App for MyApp {
                 ui.label("file:");
                 ui.label(&self.current_file.to_string());
             });
-            ui.label(format!("missing blender.exe for version \"{}\"", &self.version.version));
+            ui.label(format!(
+                "missing blender.exe for version \"{}\"",
+                &self.version.version
+            ));
             ui.add_space(16.0);
             ui.label(format!("{:#?}", &self.version));
         });
@@ -42,8 +49,6 @@ pub fn open_ui(version: &BlenderVersion, current_file: &str) -> Result<(), efram
     eframe::run_native(
         "Open Blender File",
         options,
-        Box::new(|cc| {
-            Box::new(MyApp::new(cc, version, current_file))
-        }),
+        Box::new(|cc| Box::new(MyApp::new(cc, version, current_file))),
     )
 }

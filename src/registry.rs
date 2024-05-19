@@ -1,5 +1,5 @@
 use std::ffi::OsString;
-use winreg::{RegKey, enums::*};
+use winreg::{enums::*, RegKey};
 
 /// copy
 ///     "HKEY_CLASSES_ROOT\blender.<X.Y>\DefaultIcon"

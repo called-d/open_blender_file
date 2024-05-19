@@ -14,13 +14,17 @@ impl BlenderVersion {
             _ => {
                 let numbers: Vec<&str> = human_readable_version.split(".").collect();
                 format!("{}.{:02}", numbers[0], numbers[1])
-            },
+            }
         }
     }
     pub fn from_raw_version(raw_version: &str) -> String {
         match &raw_version[0..1] {
             "1" | "2" => format!("{}.{}", &raw_version[0..1], &raw_version[1..]),
-            _ => format!("{}.{}", &raw_version[0..1], &raw_version[1..].parse::<u8>().unwrap()),
+            _ => format!(
+                "{}.{}",
+                &raw_version[0..1],
+                &raw_version[1..].parse::<u8>().unwrap()
+            ),
         }
     }
 }
@@ -40,14 +44,20 @@ pub fn get_version(version_header: &str) -> Result<BlenderVersion, InvalidVersio
     let prefix = "BLENDER";
     let suffix = "REND";
     if !(content.starts_with(prefix) && content.ends_with(suffix)) {
-        return Err(InvalidVersionHeader { content: String::from(version_header) });
+        return Err(InvalidVersionHeader {
+            content: String::from(version_header),
+        });
     }
 
-    let raw_version_string = String::from(&content[prefix.len() + 2..content.len()-suffix.len()]);
+    let raw_version_string = String::from(&content[prefix.len() + 2..content.len() - suffix.len()]);
 
     return Ok(BlenderVersion {
         version: BlenderVersion::from_raw_version(&raw_version_string),
-        bit: if content.starts_with("BLENDER-") { 64 } else { 32 },
+        bit: if content.starts_with("BLENDER-") {
+            64
+        } else {
+            32
+        },
         raw_version_string,
     });
 }
