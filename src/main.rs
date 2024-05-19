@@ -14,6 +14,12 @@ fn print_usage(program: &str, opts: &Options) {
     println!("{}", opts.usage(&brief));
 }
 
+/// Split free arguments by "--" to pass extra args to Blender.
+/// # Example
+/// ```no-run
+/// extra_args(["a", "--", "b", "c"])
+/// // -> (["a"], Some(["b", "c"]))
+/// ```
 fn extra_args(free: &Vec<String>) -> (Vec<String>, Option<Vec<String>>) {
     let mut iter = free.splitn(2, |arg| arg == "--");
     (
@@ -25,20 +31,11 @@ fn extra_args(free: &Vec<String>) -> (Vec<String>, Option<Vec<String>>) {
 }
 #[test]
 fn split_args() {
-    let (a, b) = extra_args(&Vec::<String>::new());
-    assert!(a.len() == 0 && b.is_none());
-    let (a, b) = extra_args(
-        &["1"].iter().map(|s| s.to_string()).collect()
-    );
-    assert!(a.len() == 1 && b.is_none());
-    let (a, b) = extra_args(
-        &["--"].iter().map(|s| s.to_string()).collect()
-    );
-    assert!(a.len() == 0 && b.is_some_and(|x| x.len() == 0));
-    let (a, b) = extra_args(
-        &["a", "--", "b", "c"].iter().map(|s| s.to_string()).collect()
-    );
-    assert!(a.len() == 1 && b.is_some_and(|x| x.len() == 2));
+    macro_rules! args { ($($x:expr),*) => (vec![$($x.to_string()),*]); }
+    assert_eq!(extra_args(&Vec::<String>::new()), (args![], None));
+    assert_eq!(extra_args(&args!["1"]), (args!["1"], None));
+    assert_eq!(extra_args(&args!["--"]), (args![], Some(args![])));
+    assert_eq!(extra_args(&args!["a", "--", "b", "c"]), (args!["a"], Some(args!["b", "c"])));
 }
 fn find_executable(version: &str) -> Option<String> {
     let path = match &version[0..1] {
