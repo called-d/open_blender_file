@@ -14,3 +14,4 @@ zstd = "0.13"
 
 [target."cfg(windows)".dependencies]
 lnk = "0.5.1"
+winreg = "0.52.0"
