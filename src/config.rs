@@ -65,6 +65,7 @@ pub fn load() -> Result<Settings, config::ConfigError> {
     }
 }
 
+#[allow(unused)]
 pub fn save(settings: &Settings) -> Result<(), std::io::Error> {
     let config_dir = dirs::config_dir().unwrap().join(SELF_NAME);
     fs::create_dir_all(config_dir.clone()).unwrap();
