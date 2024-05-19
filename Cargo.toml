@@ -1,5 +1,5 @@
 [package]
-name = "blender_file_version_switcher"
+name = "open_blender_file"
 version = "0.1.0"
 edition = "2021"
 

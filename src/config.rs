@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::version_checker::BlenderVersion;
 
-const SELF_NAME: &str = "blender_file_version_switcher";
+const SELF_NAME: &str = "open_blender_file";
 const CONFIG_FILE_NAME: &str = "config.json";
 
 #[derive(Debug, Serialize, Deserialize)]
