@@ -13,7 +13,14 @@ adapted from [ファイルを作成したバージョンを判別してBlender�
 .blend ファイルを右クリックしてメニューを開き
 `プログラムから開く` → `別のプログラムを選択`
 
-`アプリを選択して .blend ファイルを開く` のウィンドウで `PCでアプリを選択する` から 実行ファイル open_blender_file.exe を選ぶ
+`アプリを選択して .blend ファイルを開く` のウィンドウで `PCでアプリを選択する` から
+実行ファイル open_blender_file.exe を選び、 `常に使う` に設定する。
+
+Windowsのバージョンが違うと細かい手順に違いがあると思います。
+
+## 使用方法
+open_blender_file.exe に .blend ファイルをドロップするか、
+前項の設定をしたうえで .blend ファイルをダブルクリック等で開いてください。
 
 ## 使われる Blender.exe の優先順
 1. 設定ファイル(`%APPDATA%\open_blender_file\config.json`)に該当するバージョンがあればそれを開く
