@@ -6,6 +6,8 @@ mod file_normalizer;
 mod version_checker;
 mod config;
 mod exec;
+#[cfg(target_os = "windows")]
+mod registry;
 
 fn print_usage(program: &str, opts: &Options) {
     let brief = format!("Usage: {} FILE [options]", program);
@@ -51,6 +53,9 @@ fn main() {
     let program = args[0].clone();
 
     let mut opts = Options::new();
+    if cfg!(target_os = "windows") {
+        opts.optflag("", "set-icon", "set icon (requires Administrator to edit registry).");
+    }
     opts.optflag("h", "help", "print this help menu");
     opts.optflag("p", "print-version", "print version and exit.");
     opts.optflag("", "dry-run", "print found blender executable and exit.");
@@ -62,6 +67,12 @@ fn main() {
 
     if matches.opt_present("h") {
         print_usage(&program, &opts);
+        process::exit(0);
+    }
+
+    #[cfg(target_os = "windows")]
+    if matches.opt_present("set-icon") {
+        registry::set_icon().unwrap();
         process::exit(0);
     }
 
