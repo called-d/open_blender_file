@@ -38,6 +38,13 @@ fn split_args() {
     );
     assert!(a.len() == 1 && b.is_some_and(|x| x.len() == 2));
 }
+fn find_executable(version: &str) -> Option<String> {
+    let path = match &version[0..1] {
+        "2" => format!("C:\\Program Files\\Blender Foundation\\Blender {}\\blender.exe", version),
+        _ => format!("C:\\Program Files\\Blender Foundation\\Blender {}\\blender-launcher.exe", version),
+    };
+    if std::path::Path::new(&path).exists() { Some(path) } else { None }
+}
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -70,6 +77,7 @@ fn main() {
         }
         process::exit(-1);
     };
+    dbg!(&input);
     let version = {
         let mut reader = file_normalizer::open_buf_reader(&input);
         let mut magic = vec![0u8; 4];
@@ -97,9 +105,11 @@ fn main() {
         println!("Versoin: {}", &version.version);
         println!("Blender executable: {}", &executable.unwrap_or("missing".to_string()));
         process::exit(0);
-    } else if let Some(executable) = executable {
+    }
+    let executable = executable.or(find_executable(&version.version));
+    if let Some(executable) = executable {
         exec::open(&executable, &input, extra_args).unwrap().wait().unwrap();
     }
 
-    process::exit(0);
+    process::exit(-1);
 }
