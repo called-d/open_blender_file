@@ -1,7 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
 
 use getopts::Options;
-use std::io::BufRead;
+use std::io::{BufRead, Read};
 use std::{env, process};
 
 use crate::gui::open_ui;
@@ -66,6 +66,37 @@ fn find_executable(version: &str) -> Option<String> {
     }
 }
 
+#[cfg(target_os = "windows")]
+#[link(name = "kernel32")]
+extern "system" {
+    fn GetConsoleOutputCP() -> u32;
+    fn AllocConsole() -> i32;
+    fn GetConsoleProcessList(list: *mut u32, count: u32) -> u32;
+}
+fn enable_console() {
+    #[cfg(target_os = "windows")]
+    {
+        let has_console = unsafe { GetConsoleOutputCP() != 0 };
+        if !has_console {
+            // Try to allocate a console.
+            unsafe { AllocConsole() };
+        }
+    }
+}
+fn wait_enter() {
+    #[cfg(target_os = "windows")]
+    {
+        let mut list = [0_u32];
+        let count = unsafe { GetConsoleProcessList(list.as_mut_ptr(), 1) };
+        if count != 1 {
+            // no console
+            return;
+        }
+        println!("Press Enter to exit");
+        std::io::stdin().bytes().next();
+    }
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     let program = args[0].clone();
@@ -90,7 +121,9 @@ fn main() {
     };
 
     if matches.opt_present("h") {
+        enable_console();
         print_usage(&program, &opts);
+        wait_enter();
         process::exit(0);
     }
 
@@ -104,12 +137,14 @@ fn main() {
     let input = if matches_free.len() == 1 {
         matches_free[0].clone()
     } else {
+        enable_console();
         if matches_free.len() > 1 {
             eprintln!("extraneous arguments {:?}", &matches_free[1..]);
         }
         if matches_free.len() == 0 {
             print_usage(&program, &opts);
         }
+        wait_enter();
         process::exit(-1);
     };
     dbg!(&input);
@@ -127,7 +162,9 @@ fn main() {
 
     dbg!(&version);
     if matches.opt_present("print-version") {
+        enable_console();
         println!("{}", &version.version);
+        wait_enter();
         process::exit(0);
     }
 
@@ -135,11 +172,13 @@ fn main() {
 
     let executable = settings.get_executable(&version.version);
     if matches.opt_present("dry-run") {
+        enable_console();
         println!("Versoin: {}", &version.version);
         println!(
             "Blender executable: {}",
             &executable.unwrap_or("missing".to_string())
         );
+        wait_enter();
         process::exit(0);
     }
     let executable = executable.or(find_executable(&version.version));
