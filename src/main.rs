@@ -1,11 +1,16 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
+
 use std::{env, process};
 use getopts::Options;
 use std::io::BufRead;
+
+use crate::gui::open_ui;
 
 mod file_normalizer;
 mod version_checker;
 mod config;
 mod exec;
+mod gui;
 #[cfg(target_os = "windows")]
 mod registry;
 
@@ -117,7 +122,8 @@ fn main() {
     let executable = executable.or(find_executable(&version.version));
     if let Some(executable) = executable {
         exec::open(&executable, &input, extra_args).unwrap().wait().unwrap();
+        process::exit(0);
     }
-
+    open_ui(&version, &input).unwrap();
     process::exit(-1);
 }
