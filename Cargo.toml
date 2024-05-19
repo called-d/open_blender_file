@@ -11,3 +11,6 @@ getopts = "0.2"
 json5 = "0.4.1"
 serde = { version = "1.0.202", features = ["derive"] }
 zstd = "0.13"
+
+[target."cfg(windows)".dependencies]
+lnk = "0.5.1"
