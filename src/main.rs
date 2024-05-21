@@ -97,6 +97,18 @@ fn wait_enter() {
     }
 }
 
+fn get_version_from_file(input: &str) -> version_checker::BlenderVersion {
+    let mut reader = file_normalizer::open_buf_reader(&input);
+    let mut magic = vec![0u8; 4];
+    reader.read_exact(&mut magic).unwrap();
+    let mut reader = file_normalizer::normalize_compressed(&magic, reader).unwrap();
+
+    let mut buffer = vec![0u8; 32];
+    reader.read_until(0, &mut buffer).unwrap();
+    let version_str = std::str::from_utf8(&buffer).unwrap().trim_matches('\0');
+    version_checker::get_version(version_str).unwrap()
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     let program = args[0].clone();
@@ -148,17 +160,7 @@ fn main() {
         process::exit(-1);
     };
     dbg!(&input);
-    let version = {
-        let mut reader = file_normalizer::open_buf_reader(&input);
-        let mut magic = vec![0u8; 4];
-        reader.read_exact(&mut magic).unwrap();
-        let mut reader = file_normalizer::normalize_compressed(&magic, reader).unwrap();
-
-        let mut buffer = vec![0u8; 32];
-        reader.read_until(0, &mut buffer).unwrap();
-        let version_str = std::str::from_utf8(&buffer).unwrap().trim_matches('\0');
-        version_checker::get_version(version_str).unwrap()
-    };
+    let version = get_version_from_file(&input);
 
     dbg!(&version);
     if matches.opt_present("print-version") {
