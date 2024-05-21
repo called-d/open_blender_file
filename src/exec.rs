@@ -29,3 +29,11 @@ pub fn open(executable: &str, file: &str, args: Option<Vec<String>>) -> std::io:
         .args(args.unwrap_or_default())
         .spawn()
 }
+
+pub fn exec(executable: &str, args: Vec<String>) -> std::io::Result<Child> {
+    let (executable, link_args) = normalize_link(executable);
+    Command::new(executable)
+        .args(link_args.unwrap_or_default())
+        .args(args)
+        .spawn()
+}

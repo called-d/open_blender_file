@@ -109,8 +109,38 @@ fn get_version_from_file(input: &str) -> version_checker::BlenderVersion {
     version_checker::get_version(version_str).unwrap()
 }
 
+fn is_background_mode(args: &Vec<String>) -> bool {
+    let (args, _extra) = extra_args(args);
+    args.iter().any(|x| x == "-b" || x == "--background")
+}
+fn pass_throuh_to_blender(args: Vec<String>) -> std::process::ExitStatus {
+    let input = args
+        .iter()
+        .find(|x| x.ends_with(".blend"))
+        .expect("args must have .blend file");
+    let version = get_version_from_file(&input);
+    let settings = config::load().unwrap();
+
+    let executable = settings
+        .get_executable(&version.version)
+        .or_else(|| find_executable(&version.version))
+        .expect("blender executable should be found.");
+
+    // skip args[0] is open_blender_file.exe
+    exec::exec(&executable, args[1..].to_vec())
+        .unwrap()
+        .wait()
+        .unwrap()
+}
 fn main() {
     let args: Vec<String> = env::args().collect();
+
+    // When arguments has '-b' / '--background',
+    // it probably means that Unity is trying to import a .blend file
+    if is_background_mode(&args) {
+        let status = pass_throuh_to_blender(args);
+        process::exit(if status.success() { 0 } else { -1 });
+    }
     let program = args[0].clone();
 
     let mut opts = Options::new();
